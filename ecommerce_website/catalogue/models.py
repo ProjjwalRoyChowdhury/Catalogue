@@ -6,13 +6,14 @@ class Category(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField(blank = True)
 
-    class meta():
+    class Meta():
         verbose_name_plural = "Categories"
     
     def __str__(self):
         return self.name
 
 class Product(models.Model):
+    category = models.ForeignKey(Category, related_name="products",on_delete=models.CASCADE)
     name = models.CharField(unique = True, max_length= 100)
     slug = models.SlugField(max_length = 200, unique = True)
     description = models.TextField()

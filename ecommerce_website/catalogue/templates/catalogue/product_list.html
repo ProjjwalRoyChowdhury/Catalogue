@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Products{% if category %} in {{ category.name }}{% endif %}</h1>
+    {% for cat in categories %}
+        <a href="{% url 'catalogue:product_list_by_category' cat.slug %}">{{ cat.name }}</a> |
+    {% endfor %}
+    <ul>
+        {% for product in products %}
+            <li>
+                <a href="{% url 'catalogue:product_detail' product.slug %}">
+                    {{ product.name }} — {{ product.price }}
+                </a>
+            </li>
+        {% empty %}
+            <li>No products found.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
