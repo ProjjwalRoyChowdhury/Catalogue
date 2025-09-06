@@ -1,0 +1,282 @@
+{% extends 'dashboard/base_dashboard.html' %}
+
+{% block title %}Order #{{ order.id }} - Admin{% endblock %}
+
+{% block page_title %}Order #{{ order.id }} Details{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Order Information -->
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">Order Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Order ID:</strong> #{{ order.id }}
+                </div>
+                <div class="mb-3">
+                    <strong>Date:</strong> {{ order.created|date:"F d, Y H:i" }}
+                </div>
+                <div class="mb-3">
+                    <strong>Customer:</strong> {{ order.user.email }}
+                </div>
+                <div class="mb-3">
+                    <strong>Status:</strong>
+                    <form method="post" action="{% url 'dashboard:update_order_status' order.id %}" class="d-inline-block ms-2">
+                        {% csrf_token %}
+                        <div class="input-group input-group-sm">
+                            <select class="form-select form-select-sm" name="status" id="status">
+                                <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="paid" {% if order.status == 'paid' %}selected{% endif %}>Paid</option>
+                                <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" type="submit">Update</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="mb-3">
+                    <strong>Payment:</strong>
+                    {% if order.paid %}
+                        <span class="badge bg-success">Paid</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Unpaid</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Shipping Information -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">Shipping Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Name:</strong> {{ order.first_name }} {{ order.last_name }}
+                </div>
+                <div class="mb-3">
+                    <strong>Address:</strong><br>
+                    {{ order.address }}<br>
+                    {% if order.address2 %}{{ order.address2 }}<br>{% endif %}
+                    {{ order.city }}, {{ order.state }} {{ order.postal_code }}<br>
+                    {{ order.country }}
+                </div>
+                <div class="mb-3">
+                    <strong>Phone:</strong> {{ order.phone }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Items -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold">Order Items</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" width="100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.product.images.first %}
+                                        <img src="{{ item.product.images.first.image.url }}" alt="{{ item.product.name }}" width="50" height="50" style="object-fit: cover;" class="me-3">
+                                        {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-image text-secondary"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div>{{ item.product.name }}</div>
+                                            <small class="text-muted">SKU: {{ item.product.id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>${{ item.price|floatformat:2 }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>${{ item.get_cost|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                <td>${{ order.get_subtotal|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                <td>${{ order.shipping_cost|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Tax:</strong></td>
+                                <td>${{ order.tax|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>${{ order.get_total_cost|floatformat:2 }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Notes -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">Order Notes</h6>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                    <i class="fas fa-plus"></i> Add Note
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% if order_notes %}
+                        {% for note in order_notes %}
+                        <div class="timeline-item">
+                            <div class="timeline-date">{{ note.created|date:"M d, Y H:i" }}</div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <strong>{{ note.user.username }}</strong>
+                                </div>
+                                <div class="timeline-body">
+                                    {{ note.note }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center text-muted">No notes for this order yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'dashboard:order_management' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Orders
+            </a>
+            <div>
+                <a href="#" class="btn btn-info me-2" onclick="window.print();">
+                    <i class="fas fa-print"></i> Print Order
+                </a>
+                <a href="mailto:{{ order.user.email }}?subject=Your Order #{{ order.id }}" class="btn btn-primary">
+                    <i class="fas fa-envelope"></i> Email Customer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'dashboard:add_order_note' order.id %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addNoteModalLabel">Add Order Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="note" class="form-label">Note</label>
+                        <textarea class="form-control" id="note" name="note" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background-color: #e3e6f0;
+    }
+    
+    .timeline-item:after {
+        content: '';
+        position: absolute;
+        left: 4px;
+        top: 8px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+    }
+    
+    .timeline-date {
+        font-size: 0.8rem;
+        color: var(--secondary-color);
+        margin-bottom: 5px;
+    }
+    
+    .timeline-content {
+        background-color: #f8f9fc;
+        padding: 15px;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline-header {
+        margin-bottom: 10px;
+        color: var(--dark-color);
+    }
+    
+    .timeline-body {
+        color: var(--dark-color);
+    }
+    
+    @media print {
+        .sidebar, .topbar, .card-header, form, .btn, .modal {
+            display: none !important;
+        }
+        
+        .content-wrapper {
+            margin-left: 0 !important;
+        }
+        
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,265 @@
+{% extends 'dashboard/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}{% if product %}Edit Product{% else %}Add Product{% endif %} - Admin{% endblock %}
+
+{% block page_title %}{% if product %}Edit Product: {{ product.name }}{% else %}Add New Product{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .image-preview {
+        width: 150px;
+        height: 150px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    .image-preview .remove-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #dc3545;
+    }
+    
+    .image-preview-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .custom-file-upload {
+        border: 1px dashed #ccc;
+        display: inline-block;
+        padding: 6px 12px;
+        cursor: pointer;
+        width: 100%;
+        text-align: center;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+        transition: all 0.3s;
+    }
+    
+    .custom-file-upload:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold">{% if product %}Edit Product{% else %}Add New Product{% endif %}</h6>
+                <a href="{% url 'dashboard:product_management' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Products
+                </a>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="productForm">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_name" class="form-label">Product Name*</label>
+                                <input type="text" class="form-control {% if form.name.errors %}is-invalid{% endif %}" id="id_name" name="name" value="{{ form.name.value|default:'' }}" required>
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback">{{ form.name.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_category" class="form-label">Category*</label>
+                                <select class="form-select {% if form.category.errors %}is-invalid{% endif %}" id="id_category" name="category" required>
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if form.category.value|stringformat:'i' == category.id|stringformat:'i' %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.category.errors %}
+                                <div class="invalid-feedback">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_price" class="form-label">Price ($)*</label>
+                                        <input type="number" step="0.01" min="0" class="form-control {% if form.price.errors %}is-invalid{% endif %}" id="id_price" name="price" value="{{ form.price.value|default:'' }}" required>
+                                        {% if form.price.errors %}
+                                        <div class="invalid-feedback">{{ form.price.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="id_stock" class="form-label">Stock*</label>
+                                        <input type="number" min="0" class="form-control {% if form.stock.errors %}is-invalid{% endif %}" id="id_stock" name="stock" value="{{ form.stock.value|default:'' }}" required>
+                                        {% if form.stock.errors %}
+                                        <div class="invalid-feedback">{{ form.stock.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="id_available" name="available" {% if form.available.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="id_available">Available for Purchase</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_description" class="form-label">Description*</label>
+                                <textarea class="form-control {% if form.description.errors %}is-invalid{% endif %}" id="id_description" name="description" rows="5" required>{{ form.description.value|default:'' }}</textarea>
+                                {% if form.description.errors %}
+                                <div class="invalid-feedback">{{ form.description.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="id_slug" class="form-label">Slug</label>
+                                <input type="text" class="form-control {% if form.slug.errors %}is-invalid{% endif %}" id="id_slug" name="slug" value="{{ form.slug.value|default:'' }}" placeholder="Leave blank to auto-generate">
+                                <small class="text-muted">URL-friendly name (auto-generated if left blank)</small>
+                                {% if form.slug.errors %}
+                                <div class="invalid-feedback">{{ form.slug.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Product Images</label>
+                        <label for="id_images" class="custom-file-upload">
+                            <i class="fas fa-cloud-upload-alt"></i> Click to upload images
+                        </label>
+                        <input type="file" id="id_images" name="images" multiple style="display: none;" accept="image/*">
+                        
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            {% if product and product.images.all %}
+                                {% for image in product.images.all %}
+                                <div class="image-preview" data-id="{{ image.id }}">
+                                    <img src="{{ image.image.url }}" alt="Product Image">
+                                    <div class="remove-image" data-id="{{ image.id }}">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                    <input type="hidden" name="existing_images" value="{{ image.id }}">
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {% if product %}Update{% else %}Create{% endif %} Product
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-generate slug from name
+        const nameInput = document.getElementById('id_name');
+        const slugInput = document.getElementById('id_slug');
+        
+        if (nameInput && slugInput) {
+            nameInput.addEventListener('blur', function() {
+                if (slugInput.value === '') {
+                    const slug = nameInput.value
+                        .toLowerCase()
+                        .replace(/[^\w\s-]/g, '')
+                        .replace(/[\s_-]+/g, '-')
+                        .replace(/^-+|-+$/g, '');
+                    slugInput.value = slug;
+                }
+            });
+        }
+        
+        // Image preview functionality
+        const imageInput = document.getElementById('id_images');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                for (let i = 0; i < this.files.length; i++) {
+                    const file = this.files[i];
+                    if (!file.type.startsWith('image/')) continue;
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.createElement('div');
+                        preview.className = 'image-preview';
+                        preview.innerHTML = `
+                            <img src="${e.target.result}" alt="Preview">
+                            <div class="remove-image">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        `;
+                        previewContainer.appendChild(preview);
+                        
+                        // Add remove functionality
+                        const removeBtn = preview.querySelector('.remove-image');
+                        removeBtn.addEventListener('click', function() {
+                            preview.remove();
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Remove existing images
+        document.querySelectorAll('.remove-image').forEach(button => {
+            button.addEventListener('click', function() {
+                const imageId = this.getAttribute('data-id');
+                const preview = document.querySelector(`.image-preview[data-id="${imageId}"]`);
+                
+                if (preview) {
+                    // Create a hidden input to mark this image for deletion
+                    const deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.name = 'delete_images';
+                    deleteInput.value = imageId;
+                    document.getElementById('productForm').appendChild(deleteInput);
+                    
+                    // Remove the preview
+                    preview.remove();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
