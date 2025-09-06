@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Sidebar -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-body text-center">
+                    {% if user.profile.profile_image %}
+                        <img src="{{ user.profile.profile_image.url }}" alt="Profile Image" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                    {% endif %}
+                    <h4>{{ user.get_full_name }}</h4>
+                    <p class="text-muted">@{{ user.username }}</p>
+                </div>
+            </div>
+            
+            <div class="card shadow mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Account Navigation</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user me-2"></i> My Profile
+                    </a>
+                    <a href="{% url 'accounts:edit_profile' %}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-edit me-2"></i> Edit Profile
+                    </a>
+                    <a href="{% url 'orders:order_history' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-shopping-bag me-2"></i> Order History
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Profile Form -->
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">Personal Information</h5>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_first_name" class="form-label">First Name</label>
+                                <input type="text" name="first_name" id="id_first_name" value="{{ user_form.first_name.value }}" class="form-control {% if user_form.first_name.errors %}is-invalid{% endif %}" required>
+                                {% if user_form.first_name.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.first_name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_last_name" class="form-label">Last Name</label>
+                                <input type="text" name="last_name" id="id_last_name" value="{{ user_form.last_name.value }}" class="form-control {% if user_form.last_name.errors %}is-invalid{% endif %}" required>
+                                {% if user_form.last_name.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.last_name.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_username" class="form-label">Username</label>
+                                <input type="text" name="username" id="id_username" value="{{ user_form.username.value }}" class="form-control {% if user_form.username.errors %}is-invalid{% endif %}" required>
+                                {% if user_form.username.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.username.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_email" class="form-label">Email</label>
+                                <input type="email" name="email" id="id_email" value="{{ user_form.email.value }}" class="form-control {% if user_form.email.errors %}is-invalid{% endif %}" required>
+                                {% if user_form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ user_form.email.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_phone_number" class="form-label">Phone Number</label>
+                            <input type="text" name="phone_number" id="id_phone_number" value="{{ profile_form.phone_number.value|default:'' }}" class="form-control {% if profile_form.phone_number.errors %}is-invalid{% endif %}">
+                            {% if profile_form.phone_number.errors %}
+                                <div class="invalid-feedback">
+                                    {{ profile_form.phone_number.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="id_profile_image" class="form-label">Profile Image</label>
+                            <input type="file" name="profile_image" id="id_profile_image" class="form-control {% if profile_form.profile_image.errors %}is-invalid{% endif %}">
+                            {% if profile_form.profile_image.errors %}
+                                <div class="invalid-feedback">
+                                    {{ profile_form.profile_image.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                            {% if user.profile.profile_image %}
+                                <div class="mt-2">
+                                    <p>Current image: <a href="{{ user.profile.profile_image.url }}" target="_blank">View</a></p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <hr>
+                        <h5 class="mb-3">Shipping Address</h5>
+                        
+                        <div class="mb-3">
+                            <label for="id_address" class="form-label">Address</label>
+                            <textarea name="address" id="id_address" rows="3" class="form-control {% if profile_form.address.errors %}is-invalid{% endif %}">{{ profile_form.address.value|default:'' }}</textarea>
+                            {% if profile_form.address.errors %}
+                                <div class="invalid-feedback">
+                                    {{ profile_form.address.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_city" class="form-label">City</label>
+                                <input type="text" name="city" id="id_city" value="{{ profile_form.city.value|default:'' }}" class="form-control {% if profile_form.city.errors %}is-invalid{% endif %}">
+                                {% if profile_form.city.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.city.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_state" class="form-label">State</label>
+                                <input type="text" name="state" id="id_state" value="{{ profile_form.state.value|default:'' }}" class="form-control {% if profile_form.state.errors %}is-invalid{% endif %}">
+                                {% if profile_form.state.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.state.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_postal_code" class="form-label">Postal Code</label>
+                                <input type="text" name="postal_code" id="id_postal_code" value="{{ profile_form.postal_code.value|default:'' }}" class="form-control {% if profile_form.postal_code.errors %}is-invalid{% endif %}">
+                                {% if profile_form.postal_code.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.postal_code.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_country" class="form-label">Country</label>
+                                <input type="text" name="country" id="id_country" value="{{ profile_form.country.value|default:'' }}" class="form-control {% if profile_form.country.errors %}is-invalid{% endif %}">
+                                {% if profile_form.country.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ profile_form.country.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
