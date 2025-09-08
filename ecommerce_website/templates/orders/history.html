@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Order History{% endblock %}
+
+{% block extra_css %}
+<style>
+  .order-history-section {
+    padding: 2rem 0;
+  }
+  
+  .order-history-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  
+  .order-history-title:after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: var(--bs-primary);
+    margin-top: 0.5rem;
+  }
+  
+  .order-card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .order-card:hover {
+    transform: translateY(-5px);
+  }
+  
+  .order-card-header {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #4a8eff 100%);
+    padding: 1rem 1.5rem;
+    border: none;
+  }
+  
+  .order-card-title {
+    color: white;
+    font-weight: 600;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .order-card-body {
+    padding: 1.5rem;
+  }
+  
+  .order-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .order-meta-item {
+    display: flex;
+    align-items: center;
+  }
+  
+  .order-meta-icon {
+    color: var(--bs-primary);
+    margin-right: 0.5rem;
+    font-size: 1rem;
+  }
+  
+  .order-meta-label {
+    font-weight: 600;
+    margin-right: 0.5rem;
+    color: #6c757d;
+  }
+  
+  .order-meta-value {
+    font-weight: 500;
+  }
+  
+  .order-actions {
+    margin-top: 1rem;
+  }
+  
+  .order-btn {
+    border-radius: 30px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .order-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .order-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+  
+  .empty-orders {
+    text-align: center;
+    padding: 3rem 1rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+  }
+  
+  .empty-orders-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1.5rem;
+  }
+  
+  .empty-orders-text {
+    font-size: 1.25rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+  
+  .empty-orders-btn {
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .empty-orders-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  /* Table styles for larger screens */
+  .order-table {
+    margin-bottom: 0;
+  }
+  
+  .order-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .order-table td, .order-table th {
+    vertical-align: middle;
+  }
+  
+  /* Mobile card view */
+  @media (max-width: 767.98px) {
+    .order-history-title {
+      font-size: 1.75rem;
+    }
+    
+    .desktop-table {
+      display: none;
+    }
+    
+    .order-meta {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-cards {
+      display: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container order-history-section">
+  <h1 class="order-history-title">Order History</h1>
+  
+  {% if orders %}
+    <!-- Desktop Table View -->
+    <div class="desktop-table">
+      <div class="card shadow-sm mb-4">
+        <div class="table-responsive">
+          <table class="table order-table">
+            <thead class="table-light">
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr>
+                  <td><strong>#{{ order.id }}</strong></td>
+                  <td>{{ order.created|date:"M d, Y" }}</td>
+                  <td><strong>${{ order.get_total_cost }}</strong></td>
+                  <td>
+                    {% if order.status == 'pending' %}
+                      <span class="badge bg-warning text-dark order-badge">Pending</span>
+                    {% elif order.status == 'processing' %}
+                      <span class="badge bg-info text-dark order-badge">Processing</span>
+                    {% elif order.status == 'shipped' %}
+                      <span class="badge bg-primary order-badge">Shipped</span>
+                    {% elif order.status == 'delivered' %}
+                      <span class="badge bg-success order-badge">Delivered</span>
+                    {% elif order.status == 'cancelled' %}
+                      <span class="badge bg-danger order-badge">Cancelled</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if order.paid %}
+                      <span class="badge bg-success order-badge">Paid</span>
+                    {% else %}
+                      <span class="badge bg-danger order-badge">Unpaid</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary btn-sm order-btn">
+                      <i class="fas fa-eye me-1"></i> View Details
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mobile Card View -->
+    <div class="mobile-cards">
+      {% for order in orders %}
+        <div class="order-card">
+          <div class="order-card-header">
+            <div class="order-card-title">
+              <span>Order #{{ order.id }}</span>
+              {% if order.status == 'pending' %}
+                <span class="badge bg-warning text-dark">Pending</span>
+              {% elif order.status == 'processing' %}
+                <span class="badge bg-info text-dark">Processing</span>
+              {% elif order.status == 'shipped' %}
+                <span class="badge bg-primary">Shipped</span>
+              {% elif order.status == 'delivered' %}
+                <span class="badge bg-success">Delivered</span>
+              {% elif order.status == 'cancelled' %}
+                <span class="badge bg-danger">Cancelled</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="order-card-body">
+            <div class="order-meta">
+              <div class="order-meta-item">
+                <div class="order-meta-icon"><i class="far fa-calendar-alt"></i></div>
+                <div class="order-meta-label">Date:</div>
+                <div class="order-meta-value">{{ order.created|date:"M d, Y" }}</div>
+              </div>
+              <div class="order-meta-item">
+                <div class="order-meta-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div class="order-meta-label">Total:</div>
+                <div class="order-meta-value">${{ order.get_total_cost }}</div>
+              </div>
+              <div class="order-meta-item">
+                <div class="order-meta-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="order-meta-label">Payment:</div>
+                <div class="order-meta-value">
+                  {% if order.paid %}
+                    <span class="badge bg-success">Paid</span>
+                  {% else %}
+                    <span class="badge bg-danger">Unpaid</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            <div class="order-actions">
+              <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary order-btn w-100">
+                <i class="fas fa-eye me-2"></i> View Order Details
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-orders">
+      <div class="empty-orders-icon">
+        <i class="fas fa-shopping-bag"></i>
+      </div>
+      <h3 class="empty-orders-text">You haven't placed any orders yet</h3>
+      <p class="text-muted mb-4">Browse our products and start shopping today!</p>
+      <a href="{% url 'products:product_list' %}" class="btn btn-primary empty-orders-btn">
+        <i class="fas fa-shopping-cart me-2"></i> Start Shopping
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
