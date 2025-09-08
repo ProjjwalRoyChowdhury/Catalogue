@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Successful{% endblock %}
+
+{% block extra_css %}
+<style>
+  .success-section {
+    padding: 3rem 0;
+  }
+  
+  .success-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: none;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .success-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    padding: 1.5rem;
+    border: none;
+  }
+  
+  .success-title {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .success-icon {
+    margin-right: 0.75rem;
+  }
+  
+  .success-body {
+    padding: 3rem 2rem;
+  }
+  
+  .success-check {
+    font-size: 6rem;
+    color: #28a745;
+    margin-bottom: 1.5rem;
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .success-heading {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #343a40;
+  }
+  
+  .success-message {
+    font-size: 1.25rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+  }
+  
+  .order-number {
+    display: inline-block;
+    background-color: #f8f9fa;
+    padding: 0.5rem 1.5rem;
+    border-radius: 30px;
+    font-weight: 600;
+    margin: 1rem 0 2rem;
+    border: 1px dashed #dee2e6;
+  }
+  
+  .success-divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 2rem 0;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .success-actions {
+    margin: 2rem 0;
+  }
+  
+  .btn-view-order {
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+  }
+  
+  .btn-view-order:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 123, 255, 0.4);
+  }
+  
+  .btn-continue-shopping {
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-continue-shopping:hover {
+    transform: translateY(-3px);
+  }
+  
+  .success-footer {
+    margin-top: 2rem;
+  }
+  
+  .email-sent {
+    font-weight: 500;
+    color: #495057;
+  }
+  
+  .email-highlight {
+    font-weight: 600;
+    color: #343a40;
+  }
+  
+  .support-message {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+  
+  /* Mobile styles */
+  @media (max-width: 767.98px) {
+    .success-section {
+      padding: 2rem 0;
+    }
+    
+    .success-body {
+      padding: 2rem 1.5rem;
+    }
+    
+    .success-check {
+      font-size: 5rem;
+    }
+    
+    .success-heading {
+      font-size: 1.75rem;
+    }
+    
+    .success-message {
+      font-size: 1.1rem;
+    }
+    
+    .success-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .btn-view-order, .btn-continue-shopping {
+      width: 100%;
+      margin: 0.5rem 0;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container success-section">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="success-card">
+        <div class="card-header success-header">
+          <h4 class="success-title">
+            <span class="success-icon"><i class="fas fa-check-circle"></i></span> Payment Successful
+          </h4>
+        </div>
+        <div class="card-body success-body text-center">
+          <div>
+            <i class="fas fa-check-circle success-check"></i>
+          </div>
+          <h3 class="success-heading">Thank You for Your Order!</h3>
+          <p class="success-message">Your payment has been processed successfully.</p>
+          <div class="order-number">
+            <i class="fas fa-receipt me-2"></i> Order #{{ order.id }}
+          </div>
+          
+          <div class="success-divider"></div>
+          
+          <div class="success-actions d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-primary btn-view-order">
+              <i class="fas fa-file-invoice me-2"></i> View Order Details
+            </a>
+            <a href="{% url 'products:product_list' %}" class="btn btn-outline-secondary btn-continue-shopping">
+              <i class="fas fa-shopping-bag me-2"></i> Continue Shopping
+            </a>
+          </div>
+          
+          <div class="success-footer">
+            <p class="email-sent">
+              A confirmation email has been sent to <span class="email-highlight">{{ order.email }}</span>
+            </p>
+            <p class="support-message">
+              <i class="fas fa-info-circle me-1"></i> If you have any questions about your order, please contact our customer support.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
