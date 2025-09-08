@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block extra_css %}
+<style>
+  .checkout-section {
+    padding: 2rem 0;
+  }
+  
+  .checkout-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  
+  .checkout-title:after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background-color: var(--bs-primary);
+    margin-top: 0.5rem;
+  }
+  
+  .checkout-card {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 2rem;
+  }
+  
+  .checkout-card-header {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #4a8eff 100%);
+    padding: 1.25rem 1.5rem;
+    border: none;
+  }
+  
+  .checkout-card-title {
+    font-weight: 600;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+  }
+  
+  .checkout-form .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .checkout-form .form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+  }
+  
+  .checkout-form .form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+  
+  .checkout-form .text-danger {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  .checkout-btn {
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .checkout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .checkout-btn-back {
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  
+  .checkout-btn-back:hover {
+    transform: translateY(-3px);
+  }
+  
+  .order-summary {
+    position: sticky;
+    top: 2rem;
+  }
+  
+  .order-summary-table {
+    margin-bottom: 0;
+  }
+  
+  .order-summary-table th,
+  .order-summary-table td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+  }
+  
+  .order-summary-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .order-summary-table tfoot {
+    border-top: 2px solid #dee2e6;
+  }
+  
+  .order-summary-table tfoot td {
+    padding-top: 1rem;
+  }
+  
+  .product-name {
+    font-weight: 500;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .secure-checkout-notice {
+    display: flex;
+    align-items: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+  }
+  
+  .secure-checkout-icon {
+    font-size: 1.5rem;
+    color: var(--bs-success);
+    margin-right: 1rem;
+  }
+  
+  @media (max-width: 767.98px) {
+    .checkout-title {
+      font-size: 1.75rem;
+    }
+    
+    .order-summary {
+      position: static;
+      margin-top: 2rem;
+    }
+    
+    .checkout-btn,
+    .checkout-btn-back {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .checkout-actions {
+      flex-direction: column-reverse;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container checkout-section">
+  <div class="row g-4">
+    <div class="col-lg-8 col-md-12">
+      <h1 class="checkout-title">Checkout</h1>
+      
+      <form method="post" class="checkout-form">
+        {% csrf_token %}
+        <div class="checkout-card">
+          <div class="card-header checkout-card-header">
+            <h5 class="checkout-card-title text-white">
+              <i class="fas fa-shipping-fast me-2"></i> Shipping Information
+            </h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}
+                  <div class="text-danger">{{ form.first_name.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}
+                  <div class="text-danger">{{ form.last_name.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-12">
+                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                  {{ form.email }}
+                </div>
+                {% if form.email.errors %}
+                  <div class="text-danger">{{ form.email.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-12">
+                <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                  {{ form.address }}
+                </div>
+                {% if form.address.errors %}
+                  <div class="text-danger">{{ form.address.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label for="{{ form.postal_code.id_for_label }}" class="form-label">Postal Code</label>
+                {{ form.postal_code }}
+                {% if form.postal_code.errors %}
+                  <div class="text-danger">{{ form.postal_code.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label for="{{ form.city.id_for_label }}" class="form-label">City</label>
+                {{ form.city }}
+                {% if form.city.errors %}
+                  <div class="text-danger">{{ form.city.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="secure-checkout-notice">
+          <div class="secure-checkout-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div>
+            <h6 class="mb-1">Secure Checkout</h6>
+            <p class="mb-0 text-muted small">Your information is protected using industry-standard encryption.</p>
+          </div>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-4 checkout-actions">
+          <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-secondary checkout-btn-back">
+            <i class="fas fa-arrow-left me-2"></i> Back to Cart
+          </a>
+          <button type="submit" class="btn btn-primary checkout-btn">
+            Continue to Payment <i class="fas fa-arrow-right ms-2"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+    
+    <div class="col-lg-4 col-md-12">
+      <div class="checkout-card order-summary">
+        <div class="card-header checkout-card-header">
+          <h5 class="checkout-card-title text-white">
+            <i class="fas fa-shopping-basket me-2"></i> Order Summary
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <table class="table order-summary-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th class="text-end">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart %}
+                <tr>
+                  <td>
+                    <div class="product-name">{{ item.product.name }}</div>
+                  </td>
+                  <td>{{ item.quantity }}</td>
+                  <td class="text-end">${{ item.total_price }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2"><strong>Subtotal</strong></td>
+                <td class="text-end"><strong>${{ cart.get_total_price }}</strong></td>
+              </tr>
+              <tr>
+                <td colspan="2">Shipping</td>
+                <td class="text-end">Free</td>
+              </tr>
+              <tr>
+                <td colspan="2"><strong>Total</strong></td>
+                <td class="text-end"><strong class="text-primary fs-5">${{ cart.get_total_price }}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Add form-control class to all form inputs
+  document.addEventListener('DOMContentLoaded', function() {
+    const formInputs = document.querySelectorAll('form input, form select, form textarea');
+    formInputs.forEach(input => {
+      input.classList.add('form-control');
+    });
+  });
+</script>
+{% endblock %}
