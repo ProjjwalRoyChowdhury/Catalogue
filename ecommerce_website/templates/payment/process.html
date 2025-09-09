@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Process{% endblock %}
+
+{% block extra_css %}
+<style>
+  .payment-section {
+    padding: 2rem 0;
+  }
+  
+  .payment-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: none;
+  }
+  
+  .payment-card-header {
+    background: linear-gradient(135deg, var(--bs-primary) 0%, #4a8eff 100%);
+    padding: 1.5rem;
+    border: none;
+  }
+  
+  .payment-card-title {
+    color: white;
+    font-weight: 700;
+    margin-bottom: 0;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .payment-card-icon {
+    margin-right: 0.75rem;
+    font-size: 1.25rem;
+  }
+  
+  .payment-card-body {
+    padding: 2rem;
+  }
+  
+  .order-summary-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f0f0f0;
+  }
+  
+  .payment-table {
+    margin-bottom: 2rem;
+  }
+  
+  .payment-table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+  }
+  
+  .payment-table td, .payment-table th {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+  }
+  
+  .payment-table tfoot {
+    border-top: 2px solid #dee2e6;
+  }
+  
+  .payment-table tfoot td {
+    padding-top: 1rem;
+  }
+  
+  .product-name {
+    font-weight: 500;
+  }
+  
+  .payment-divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 2rem 0;
+  }
+  
+  .payment-cta {
+    text-align: center;
+    padding: 1.5rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+  }
+  
+  .payment-cta-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  
+  .payment-cta-text {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+  
+  .payment-btn {
+    border-radius: 30px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+  }
+  
+  .payment-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+  }
+  
+  .back-btn {
+    border-radius: 30px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+  }
+  
+  .back-btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  .secure-payment-notice {
+    border-radius: 10px;
+    border-left: 4px solid var(--bs-info);
+    background-color: rgba(13, 202, 240, 0.1);
+  }
+  
+  .secure-payment-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .secure-payment-icon {
+    color: var(--bs-info);
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+  }
+  
+  .payment-methods {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .payment-method-icon {
+    font-size: 2rem;
+    color: #6c757d;
+  }
+  
+  /* Mobile styles */
+  @media (max-width: 767.98px) {
+    .payment-card-body {
+      padding: 1.5rem;
+    }
+    
+    .payment-btn {
+      width: 100%;
+    }
+    
+    .back-btn {
+      width: 100%;
+    }
+    
+    .mobile-product-item {
+      padding: 1rem 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .mobile-product-item:last-child {
+      border-bottom: none;
+    }
+    
+    .mobile-product-name {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .mobile-product-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container payment-section">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <div class="payment-card">
+        <div class="card-header payment-card-header">
+          <h4 class="payment-card-title">
+            <span class="payment-card-icon"><i class="fas fa-credit-card"></i></span> Complete Your Payment
+          </h4>
+        </div>
+        <div class="card-body payment-card-body">
+          <h5 class="order-summary-title">Order Summary</h5>
+          
+          <!-- Desktop view -->
+          <div class="table-responsive d-none d-md-block">
+            <table class="table payment-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th class="text-end">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in order.items.all %}
+                  <tr>
+                    <td>
+                      <div class="product-name">{{ item.product.name }}</div>
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td class="text-end">${{ item.get_cost }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"><strong>Total</strong></td>
+                  <td class="text-end"><strong class="text-primary fs-5">${{ order.get_total_cost }}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          
+          <!-- Mobile view -->
+          <div class="d-md-none">
+            {% for item in order.items.all %}
+              <div class="mobile-product-item">
+                <div class="mobile-product-name">{{ item.product.name }}</div>
+                <div class="mobile-product-meta">
+                  <span>{{ item.quantity }} × item(s)</span>
+                  <span>${{ item.get_cost }}</span>
+                </div>
+              </div>
+            {% endfor %}
+            <div class="p-3 bg-light rounded-3 mt-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Total</span>
+                <span class="fw-bold text-primary fs-5">${{ order.get_total_cost }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="payment-divider"></div>
+          
+          <div class="payment-cta">
+            <h5 class="payment-cta-title">Ready to complete your purchase?</h5>
+            <p class="payment-cta-text">You'll be redirected to Stripe's secure payment page.</p>
+            <form action="{% url 'payment:process' %}?order_id={{ order.id }}" method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success payment-btn">
+                <i class="fas fa-credit-card me-2"></i> Pay ${{ order.get_total_cost }} Now
+              </button>
+            </form>
+            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-secondary back-btn">
+              <i class="fas fa-arrow-left me-2"></i> Back to Order
+            </a>
+          </div>
+          
+          <div class="secure-payment-notice p-3">
+            <div class="secure-payment-title">
+              <span class="secure-payment-icon"><i class="fas fa-shield-alt"></i></span>
+              Secure Payment
+            </div>
+            <p class="mb-0 small">Your payment information is securely processed through Stripe. We never store your card details.</p>
+          </div>
+          
+          <div class="payment-methods">
+            <span class="payment-method-icon"><i class="fab fa-cc-visa"></i></span>
+            <span class="payment-method-icon"><i class="fab fa-cc-mastercard"></i></span>
+            <span class="payment-method-icon"><i class="fab fa-cc-amex"></i></span>
+            <span class="payment-method-icon"><i class="fab fa-cc-discover"></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
