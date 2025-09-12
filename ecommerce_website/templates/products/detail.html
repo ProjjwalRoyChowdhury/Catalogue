@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --product-primary: var(--bs-primary);
+        --product-primary-light: rgba(var(--bs-primary-rgb), 0.1);
+        --product-primary-dark: var(--bs-primary-darker);
+    }
+
+    .product-detail-section {
+        padding: 2.5rem 0;
+        background-color: var(--bs-body-bg);
+    }
+    
+    /* Breadcrumb Styles */
+    .breadcrumb-wrapper {
+        margin-bottom: 1.75rem;
+        background-color: var(--bs-light);
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .breadcrumb-item a {
+        color: var(--product-primary);
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    
+    .breadcrumb-item a:hover {
+        color: var(--product-primary-dark);
+        text-decoration: underline !important;
+    }
+    
+    .breadcrumb-item.active {
+        font-weight: 600;
+    }
+    
+    /* Product Carousel Styles */
+    .product-carousel {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .carousel-item img {
+        height: 450px;
+        object-fit: contain;
+        width: 100%;
+        transition: transform 0.6s ease;
+        background-color: #fff;
+    }
+    
+    .carousel-item:hover img {
+        transform: scale(1.05);
+    }
+    
+    .carousel-indicators {
+        bottom: 10px;
+    }
+    
+    .carousel-indicators button {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin: 0 5px;
+        background-color: rgba(255,255,255,0.5);
+        border: none;
+    }
+    
+    .carousel-indicators button.active {
+        background-color: var(--product-primary);
+        transform: scale(1.2);
+    }
+    
+    .carousel-control-prev, .carousel-control-next {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .product-carousel:hover .carousel-control-prev,
+    .product-carousel:hover .carousel-control-next {
+        opacity: 0.8;
+    }
+    
+    /* Thumbnail Styles */
+    .carousel-thumbnails {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 12px 0;
+        scrollbar-width: thin;
+        -ms-overflow-style: none;
+    }
+    
+    .carousel-thumbnails::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .carousel-thumbnails::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .carousel-thumbnails::-webkit-scrollbar-thumb {
+        background: var(--product-primary);
+        border-radius: 10px;
+    }
+    
+    .carousel-thumbnail-item {
+        width: 90px;
+        height: 70px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+        border: 2px solid transparent;
+    }
+    
+    .carousel-thumbnail-item:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    
+    .carousel-thumbnail-item.active {
+        opacity: 1;
+        border-color: var(--product-primary);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .carousel-thumbnail-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    
+    .carousel-thumbnail-item:hover img {
+        transform: scale(1.1);
+    }
+    
+    /* Product Info Styles */
+    .product-info-wrapper {
+        padding: 0.5rem;
+    }
+    
+    .product-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+        color: var(--bs-dark);
+        transition: color 0.3s ease;
+    }
+    
+    .product-rating {
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .stars {
+        display: inline-flex;
+        align-items: center;
+    }
+    
+    .stars i {
+        margin-right: 2px;
+    }
+    
+    .product-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--product-primary);
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        position: relative;
+    }
+    
+    .product-price::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background-color: var(--product-primary-light);
+        border-radius: 3px;
+    }
+    
+    .stock-badge {
+        padding: 0.5rem 1.25rem;
+        border-radius: 30px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .stock-badge i {
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 0.7; }
+        50% { opacity: 1; }
+        100% { opacity: 0.7; }
+    }
+    
+    .product-description {
+        background-color: var(--bs-light);
+        padding: 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--product-primary);
+    }
+    
+    /* Add to Cart Section */
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        max-width: 180px;
+    }
+    
+    .quantity-selector .btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background-color: var(--bs-light);
+        color: var(--bs-dark);
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+    
+    .quantity-selector .btn:hover {
+        background-color: var(--product-primary-light);
+        color: var(--product-primary);
+    }
+    
+    .quantity-selector input {
+        text-align: center;
+        font-weight: 600;
+        border-radius: 8px;
+        height: 40px;
+    }
+    
+    .add-to-cart-btn {
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .add-to-cart-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: all 0.6s ease;
+        z-index: -1;
+    }
+    
+    .add-to-cart-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+    
+    .add-to-cart-btn:hover::before {
+        left: 100%;
+    }
+    
+    /* Reviews Section */
+    .reviews-section {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .reviews-header {
+        position: relative;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        font-weight: 700;
+        color: var(--bs-dark);
+    }
+    
+    .reviews-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 80px;
+        height: 3px;
+        background-color: var(--product-primary);
+        border-radius: 3px;
+    }
+    
+    .review-card {
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    }
+    
+    .review-card:hover {
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        transform: translateY(-5px);
+    }
+    
+    .review-card .card-title {
+        font-weight: 600;
+    }
+    
+    .review-form-card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .review-form-card .card-header {
+        background: linear-gradient(135deg, var(--product-primary), var(--product-primary-dark));
+        padding: 1.25rem;
+    }
+    
+    .review-form-card .form-select,
+    .review-form-card .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .review-form-card .form-select:focus,
+    .review-form-card .form-control:focus {
+        border-color: var(--product-primary);
+        box-shadow: 0 0 0 0.25rem var(--product-primary-light);
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 991.98px) {
+        .product-title {
+            font-size: 1.75rem;
+        }
+        
+        .product-price {
+            font-size: 1.75rem;
+        }
+        
+        .carousel-item img {
+            height: 400px;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .product-detail-section {
+            padding: 1.5rem 0;
+        }
+        
+        .breadcrumb-wrapper {
+            margin-bottom: 1.25rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .product-title {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+        }
+        
+        .carousel-item img {
+            height: 300px;
+        }
+        
+        .carousel-thumbnail-item {
+            width: 70px;
+            height: 55px;
+        }
+        
+        .stock-badge {
+            padding: 0.4rem 1rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        .add-to-cart-btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .reviews-section {
+            margin-top: 3rem;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .carousel-item img {
+            height: 250px;
+        }
+        
+        .product-title {
+            font-size: 1.35rem;
+        }
+        
+        .product-price {
+            font-size: 1.35rem;
+        }
+        
+        .quantity-selector {
+            max-width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container product-detail-section">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="breadcrumb-wrapper">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}" class="text-decoration-none"><i class="fas fa-store-alt me-1"></i>Products</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'products:product_list_by_category' product.category.slug %}" class="text-decoration-none">{{ product.category.name }}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <div class="col-lg-6 col-md-12">
+      <div class="product-carousel">
+        <div id="productCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-indicators">
+            {% if product.images.all %}
+              {% for image in product.images.all %}
+              <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+              {% endfor %}
+            {% else %}
+              <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="0" class="active" aria-label="Slide 1"></button>
+            {% endif %}
+          </div>
+          
+          <div class="carousel-inner">
+            {% if product.images.all %}
+              {% for image in product.images.all %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                  <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ product.name }}">
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="carousel-item active">
+                <img src="{% static 'img/no_image.png' %}" class="d-block w-100" alt="{{ product.name }}">
+              </div>
+            {% endif %}
+          </div>
+          {% if product.images.count > 1 %}
+            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          {% endif %}
+        </div>
+      </div>
+      
+      {% if product.images.count > 1 %}
+      <div class="carousel-thumbnails">
+        {% for image in product.images.all %}
+        <div class="carousel-thumbnail-item {% if forloop.first %}active{% endif %}" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}">
+          <img src="{{ image.image.url }}" alt="Thumbnail {{ forloop.counter }}">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="col-lg-6 col-md-12">
+      <div class="product-info-wrapper">
+        <h1 class="product-title">{{ product.name }}</h1>
+        
+        <div class="product-rating">
+          {% if product.average_rating %}
+            <div class="stars">
+              {% for i in "12345"|make_list %}
+                {% if forloop.counter <= product.average_rating|floatformat:0 %}
+                  <i class="fas fa-star text-warning"></i>
+                {% elif forloop.counter <= product.average_rating|add:0.5|floatformat:0 %}
+                  <i class="fas fa-star-half-alt text-warning"></i>
+                {% else %}
+                  <i class="far fa-star text-warning"></i>
+                {% endif %}
+              {% endfor %}
+              <span class="ms-2 fw-bold">({{ product.reviews.count }} reviews)</span>
+            </div>
+          {% else %}
+            <span class="text-muted"><i class="far fa-star me-1"></i> No ratings yet</span>
+          {% endif %}
+        </div>
+        
+        <div class="product-price">${{ product.price }}</div>
+        
+        {% if product.stock > 0 %}
+          <span class="badge bg-success stock-badge">
+            <i class="fas fa-check-circle me-1"></i> In Stock ({{ product.stock }} available)
+          </span>
+        {% else %}
+          <span class="badge bg-danger stock-badge">
+            <i class="fas fa-times-circle me-1"></i> Out of Stock
+          </span>
+        {% endif %}
+        
+        <div class="product-description">
+          {{ product.description|linebreaks }}
+        </div>
+        
+        {% if product.stock > 0 %}
+          <form action="{% url 'cart:cart_add' product.id %}" method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="row g-3 align-items-center">
+              <div class="col-12 col-sm-6">
+                <label for="{{ cart_product_form.quantity.id_for_label }}" class="form-label fw-bold">Quantity:</label>
+                <div class="quantity-selector">
+                  <button type="button" class="btn" onclick="decrementQuantity()"><i class="fas fa-minus"></i></button>
+                  {{ cart_product_form.quantity }}
+                  <button type="button" class="btn" onclick="incrementQuantity('{{ product.stock }}')"><i class="fas fa-plus"></i></button>
+                </div>
+                {{ cart_product_form.override }}
+              </div>
+              <div class="col-12 col-sm-6">
+                <button type="submit" class="btn btn-primary add-to-cart-btn w-100">
+                  <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                </button>
+              </div>
+            </div>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Reviews Section -->
+  <div class="reviews-section">
+    <h3 class="reviews-header">Customer Reviews</h3>
+    
+    {% if product.reviews.all %}
+      <div class="row">
+        {% for review in product.reviews.all %}
+          <div class="col-lg-6 col-md-12">
+            <div class="card review-card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <h5 class="card-title mb-0"><i class="fas fa-user-circle me-2"></i>{{ review.user.username }}</h5>
+                  <div class="stars">
+                    {% for i in "12345"|make_list %}
+                      {% if forloop.counter <= review.rating %}
+                        <i class="fas fa-star text-warning"></i>
+                      {% else %}
+                        <i class="far fa-star text-warning"></i>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+                <h6 class="card-subtitle mb-3 text-muted"><i class="far fa-calendar-alt me-1"></i>{{ review.created|date:"F d, Y" }}</h6>
+                <p class="card-text">{{ review.comment }}</p>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert alert-info d-flex align-items-center">
+        <i class="fas fa-info-circle me-3 fs-4"></i>
+        <div>
+          <p class="mb-0 fw-medium">No reviews yet. Be the first to review this product!</p>
+        </div>
+      </div>
+    {% endif %}
+    
+    {% if user.is_authenticated %}
+      <div class="card mt-4 review-form-card">
+        <div class="card-header text-white">
+          <h4 class="mb-0"><i class="fas fa-pen me-2"></i>Write a Review</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{% url 'products:add_review' product.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="rating" class="form-label fw-bold">Rating</label>
+              <select name="rating" id="rating" class="form-select" required>
+                <option value="" disabled selected>Select your rating</option>
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Very Good</option>
+                <option value="3">3 - Good</option>
+                <option value="2">2 - Fair</option>
+                <option value="1">1 - Poor</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="comment" class="form-label fw-bold">Your Review</label>
+              <textarea name="comment" id="comment" class="form-control" rows="4" placeholder="Share your thoughts about this product" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary add-to-cart-btn">
+              <i class="fas fa-paper-plane me-2"></i>Submit Review
+            </button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-warning mt-4 d-flex align-items-center">
+        <i class="fas fa-lock me-3 fs-4"></i>
+        <div>
+          <p class="mb-0 fw-medium">Please <a href="{% url 'accounts:login' %}" class="alert-link">log in</a> to write a review.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function decrementQuantity() {
+    const input = document.getElementById('{{ cart_product_form.quantity.id_for_label }}');
+    const currentValue = parseInt(input.value);
+    if (currentValue > 1) {
+      input.value = currentValue - 1;
+    }
+  }
+  
+  function incrementQuantity(maxStock) {
+    const input = document.getElementById('{{ cart_product_form.quantity.id_for_label }}');
+    const currentValue = parseInt(input.value);
+    if (currentValue < maxStock) {
+      input.value = currentValue + 1;
+    }
+  }
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    const thumbnails = document.querySelectorAll('.carousel-thumbnail-item');
+    thumbnails.forEach(thumbnail => {
+      thumbnail.addEventListener('click', function() {
+        thumbnails.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    
+    const carousel = document.getElementById('productCarousel');
+    if (carousel) {
+      carousel.addEventListener('slid.bs.carousel', function(event) {
+        thumbnails.forEach(t => t.classList.remove('active'));
+        const activeIndex = event.to;
+        thumbnails[activeIndex].classList.add('active');
+      });
+    }
+  });
+</script>
+{% endblock %}
