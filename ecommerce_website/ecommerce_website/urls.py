@@ -1,5 +1,5 @@
 """
-URL configuration for ecommerce_website project.
+URL configuration for ecommerce_store project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -17,13 +17,21 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls.static import settings, static
+from django.conf import settings
+from django.conf.urls.static import static
+from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("",include('catalogue.urls', namespace = 'catalogue')),
-    path('accounts/',include('django.contrib.auth.urls')),
+    path('', views.home, name='home'),
+    path("accounts/", include("accounts.urls")),
+    path("products/", include("products.urls")),
+    path("cart/", include("cart.urls")),
+    path("orders/", include("orders.urls")),
+    path("payment/", include("payment.urls")),
+    path("dashboard/", include("dashboard.urls")),
 ]
 
+# Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

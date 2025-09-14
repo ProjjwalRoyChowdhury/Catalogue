@@ -1,5 +1,5 @@
 """
-WSGI config for ecommerce_website project.
+WSGI config for ecommerce_store project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
