@@ -2,43 +2,549 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My E-Commerce Site</title>
-    <!-- Optional: Bootstrap for styling -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}E-Commerce Store{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-dark: #0b5ed7;
+            --secondary-color: #6c757d;
+            --accent-color: #ffc107;
+            --success-color: #198754;
+            --info-color: #0dcaf0;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --body-bg: #f8f9fa;
+            --card-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--dark-color);
+        }
+        
+        main {
+            flex: 1 0 auto;
+            padding-top: 1rem;
+            padding-bottom: 2rem;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            padding: 0.75rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .navbar-brand i {
+            color: var(--accent-color);
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: var(--accent-color);
+            transition: var(--transition);
+            transform: translateX(-50%);
+        }
+        
+        .nav-link:hover::after {
+            width: 70%;
+        }
+        
+        .cart-icon {
+            position: relative;
+            font-size: 1.25rem;
+            transition: var(--transition);
+        }
+        
+        .cart-icon:hover {
+            color: var(--accent-color);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .dropdown-menu {
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        
+        .dropdown-item i {
+            width: 1.25rem;
+            text-align: center;
+        }
+        
+        /* Button Styles */
+        .btn {
+            border-radius: 0.5rem;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            transition: var(--transition);
+        }
+        
+        .btn-primary {
+            box-shadow: 0 4px 10px rgba(13, 110, 253, 0.3);
+        }
+        
+        .btn-success {
+            box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+        }
+        
+        .btn-hover-effect {
+            transition: var(--transition);
+        }
+        
+        .btn-hover-effect:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Card Styles */
+        .card {
+            transition: var(--transition);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            border: none;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .card-footer {
+            background-color: transparent;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 1.25rem 1.5rem;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            border-radius: 0.75rem;
+            border: none;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* Footer Styles */
+        footer {
+            margin-top: 3rem;
+            padding: 3rem 0 2rem;
+            background-color: var(--light-color);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        footer h5 {
+            position: relative;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        
+        footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        footer .social-icons .btn {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+        
+        footer .social-icons .btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* Mobile Styles */
+        @media (max-width: 767.98px) {
+            .navbar .dropdown-menu {
+                position: static;
+                float: none;
+                width: auto;
+                margin-top: 0;
+                background-color: rgba(255,255,255,0.05);
+                border: 0;
+                box-shadow: none;
+                border-radius: 0.5rem;
+            }
+            
+            .navbar .dropdown-menu .dropdown-item {
+                color: rgba(255,255,255,.85);
+                padding: 0.75rem 1rem;
+            }
+            
+            .navbar .dropdown-menu .dropdown-item:hover {
+                color: #fff;
+                background-color: rgba(255,255,255,0.1);
+            }
+            
+            .navbar-nav .nav-link {
+                padding: 0.75rem 1rem;
+            }
+            
+            footer {
+                text-align: center;
+            }
+            
+            footer h5::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-
-<!-- Navigation bar -->
-<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'catalogue:product_list' %}">My Shop</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                {% if user.is_authenticated %}
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="fas fa-store me-2"></i>
+                <span>E-Commerce Store</span>
+            </a>
+            <div class="d-flex order-lg-1 ms-auto me-2 align-items-center">
+                <!-- Search toggle for mobile -->
+                <button class="btn text-white d-lg-none me-2" type="button" data-bs-toggle="collapse" data-bs-target="#searchCollapse" aria-expanded="false" aria-controls="searchCollapse">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <!-- Cart icon -->
+                <a class="nav-link cart-icon text-white px-2 position-relative" href="{% url 'cart:cart_detail' %}" aria-label="Shopping Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    {% with total_items=cart|length %}
+                        {% if total_items > 0 %}
+                            <span class="cart-count">{{ total_items }}</span>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+            </div>
+            
+            <!-- Mobile navbar toggler -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Collapsible search bar for mobile -->
+            <div class="collapse navbar-collapse mt-2 d-lg-none" id="searchCollapse">
+                <form class="d-flex w-100" action="{% url 'products:product_search' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control" placeholder="Search products..." aria-label="Search">
+                        <button class="btn btn-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Main navbar content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <span class="navbar-text">Hello, {{ user.username }}</span>
+                        <a class="nav-link" href="{% url 'products:product_list' %}">
+                            <i class="fas fa-tags me-1 d-lg-none"></i> Products
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}?next={{ request.path }}">Logout</a>
-                    </li>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-star me-1 d-lg-none"></i> Featured
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'catalogue:register' %}">Register</a>
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-percentage me-1 d-lg-none"></i> Deals
+                        </a>
                     </li>
-                {% endif %}
-            </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-info-circle me-1 d-lg-none"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-envelope me-1 d-lg-none"></i> Contact
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Desktop search form -->
+                <!-- <form class="d-none d-lg-flex me-3" action="{% url 'products:product_search' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control" placeholder="Search products..." aria-label="Search">
+                        <button class="btn btn-light" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form> -->
+                
+                <hr class="d-lg-none text-white-50">
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-id-card me-2"></i>My Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'orders:order_history' %}"><i class="fas fa-box me-2"></i>My Orders</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-heart me-2"></i>Wishlist</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">
+                                <i class="fas fa-sign-in-alt me-1"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:register' %}">
+                                <i class="fas fa-user-plus me-1"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <form class="d-flex mt-3 d-lg-none" action="{% url 'products:product_search' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control" placeholder="Search products...">
+                        <button type="submit" class="btn btn-light">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
-<!-- Page content -->
-<div class="container">
-    {% block content %}
-    {% endblock %}
-</div>
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light py-5 mt-5">
+        <div class="container">
+            <div class="row gy-4 gx-4">
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold">E-Commerce Store</h5>
+                    <p class="text-muted mb-4">Your one-stop shop for quality products at affordable prices. We offer a wide range of items with fast shipping and excellent customer service.</p>
+                    <div class="social-icons mb-4">
+                        <a href="#" class="btn btn-sm btn-outline-primary me-2 rounded-circle" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-info me-2 rounded-circle" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-danger me-2 rounded-circle" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="btn btn-sm btn-outline-dark rounded-circle" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h5 class="fw-bold">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{% url 'products:product_list' %}" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> Products
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> About Us
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> Contact
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> Terms & Conditions
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h5 class="fw-bold">My Account</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{% url 'accounts:profile' %}" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> My Profile
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'orders:order_history' %}" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> Order History
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'cart:cart_detail' %}" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> My Cart
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#" class="text-decoration-none text-muted d-inline-flex align-items-center">
+                                <i class="fas fa-angle-right me-2 small text-primary"></i> Wishlist
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold">Contact Us</h5>
+                    <ul class="list-unstyled text-muted mb-4">
+                        <li class="mb-3 d-flex">
+                            <i class="fas fa-map-marker-alt me-3 text-primary"></i>
+                            <span>123 E-Commerce St., Shopping District, City, 12345</span>
+                        </li>
+                        <li class="mb-3 d-flex">
+                            <i class="fas fa-phone me-3 text-primary"></i>
+                            <span>(123) 456-7890</span>
+                        </li>
+                        <li class="mb-3 d-flex">
+                            <i class="fas fa-envelope me-3 text-primary"></i>
+                            <span>info@ecommerce.com</span>
+                        </li>
+                    </ul>
+                    <h5 class="fw-bold mb-3">Newsletter</h5>
+                    <p class="text-muted small mb-3">Subscribe to receive updates on new products and special promotions</p>
+                    <form class="row g-2">
+                        <div class="col-8">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fas fa-envelope text-muted"></i>
+                                </span>
+                                <input type="email" class="form-control border-start-0" placeholder="Your email address">
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary w-100 btn-hover-effect">
+                                Subscribe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <p class="mb-0">&copy; {% now "Y" %} E-Commerce Store. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <div class="payment-methods">
+                        <i class="fab fa-cc-visa fs-4 mx-1 text-muted"></i>
+                        <i class="fab fa-cc-mastercard fs-4 mx-1 text-muted"></i>
+                        <i class="fab fa-cc-amex fs-4 mx-1 text-muted"></i>
+                        <i class="fab fa-cc-paypal fs-4 mx-1 text-muted"></i>
+                        <i class="fab fa-cc-discover fs-4 mx-1 text-muted"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
