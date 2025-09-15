@@ -30,6 +30,8 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
     path("payment/", include("payment.urls")),
     path("dashboard/", include("dashboard.urls")),
+    path("contact/", include("contactus.urls")),
+    path("aboutus/", include("aboutus.urls")),
 ]
 
 # Serve media files in development
